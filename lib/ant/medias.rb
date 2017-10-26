@@ -162,23 +162,19 @@ module Ant
 
     private
 
-    def get_resource(url, limit = 3)
+    def get_resource(url)
 
-      res = ::Net::HTTP.get_response(URI(url))
+      begin
 
-      return {} if limit < 0
+        res = open(URI.parse(url), {
+          ssl_verify_mode: ::OpenSSL::SSL::VERIFY_NONE
+        }).read
 
-      case res
-        when Net::HTTPSuccess then
-          ::JSON.parse(res.body) rescue {}
-        when Net::HTTPRedirection then
-          get_resource(res['location'], limit - 1)
-        else
-          {}
-      end
+        ::JSON.parse(res)
 
-      rescue => e
+      rescue Exception => e
         {}
+      end
 
     end # get_resource
 
@@ -202,7 +198,7 @@ end # Ant
   end
 
   # Twitter
-  tag :tweet , singular: true, aliases: [
+  tag :tweet, singular: true, aliases: [
     :twit,
     :twet,
     :tweeter,
